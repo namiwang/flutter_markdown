@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
@@ -104,7 +105,7 @@ class MarkdownBuilder implements md.NodeVisitor {
   /// Returns widgets that display the given Markdown nodes.
   ///
   /// The returned widgets are typically used as children in a [ListView].
-  List<Widget> build(List<md.Node> nodes) {
+  Widget build(md.Node node) {
     _listIndents.clear();
     _blocks.clear();
     _inlines.clear();
@@ -112,13 +113,15 @@ class MarkdownBuilder implements md.NodeVisitor {
 
     _blocks.add(new _BlockElement(null));
 
-    for (md.Node node in nodes) {
-      assert(_blocks.length == 1);
-      node.accept(this);
-    }
+    node.accept(this);
 
     assert(_inlines.isEmpty);
-    return _blocks.single.children;
+
+    if (_blocks.single.children.isEmpty) {
+      return null;
+    }
+
+    return _blocks.single.children.first;
   }
 
   @override

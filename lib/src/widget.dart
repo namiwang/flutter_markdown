@@ -71,14 +71,17 @@ abstract class MarkdownWidget extends StatefulWidget {
   /// Subclasses should override this function to display the given children,
   /// which are the parsed representation of [data].
   @protected
-  Widget build(BuildContext context, List<Widget> children);
+  Widget build(BuildContext context, List<md.Node> children, MarkdownBuilder builder);
 
   @override
   _MarkdownWidgetState createState() => new _MarkdownWidgetState();
 }
 
 class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuilderDelegate {
-  List<Widget> _children;
+  List<md.Node> _topLevelNodes;
+  MarkdownBuilder _builder;
+
+  // List<Widget> _children;
   final List<GestureRecognizer> _recognizers = <GestureRecognizer>[];
 
   @override
@@ -109,12 +112,14 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
     // TODO: This can be optimized by doing the split and removing \r at the same time
     final List<String> lines = widget.data.replaceAll('\r\n', '\n').split('\n');
     final md.Document document = new md.Document(encodeHtml: false);
-    final MarkdownBuilder builder = new MarkdownBuilder(
+
+    _builder = new MarkdownBuilder(
       delegate: this,
       styleSheet: styleSheet,
       imageDirectory: widget.imageDirectory,
     );
-    _children = builder.build(document.parseLines(lines));
+
+    _topLevelNodes = document.parseLines(lines);
   }
 
   void _disposeRecognizers() {
@@ -145,7 +150,7 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
   }
 
   @override
-  Widget build(BuildContext context) => widget.build(context, _children);
+  Widget build(BuildContext context) => widget.build(context, _topLevelNodes, _builder);
 }
 
 /// A non-scrolling widget that parses and displays Markdown.
@@ -176,13 +181,14 @@ class MarkdownBody extends MarkdownWidget {
   );
 
   @override
-  Widget build(BuildContext context, List<Widget> children) {
-    if (children.length == 1)
-      return children.single;
-    return new Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children,
-    );
+  Widget build(BuildContext context, List<md.Node> children, MarkdownBuilder builder) {
+    throw 'UNIMPL';
+    // if (children.length == 1)
+    //   return children.single;
+    // return new Column(
+    //   crossAxisAlignment: CrossAxisAlignment.stretch,
+    //   children: children,
+    // );
   }
 }
 
@@ -218,7 +224,14 @@ class Markdown extends MarkdownWidget {
   final EdgeInsets padding;
 
   @override
-  Widget build(BuildContext context, List<Widget> children) {
-    return new ListView(padding: padding, children: children);
+  Widget build(BuildContext context, List<md.Node> children, MarkdownBuilder builder) {
+    return new ListView.builder(
+      padding: padding,
+      itemCount: children.length,
+      itemBuilder: (BuildContext context, int index) {
+        final node = children[index];
+        return builder.build(node);
+      },
+    );
   }
 }
