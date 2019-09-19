@@ -217,11 +217,7 @@ class MarkdownBuilder implements md.NodeVisitor {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: IntrinsicWidth(
-              child: Container(
-                decoration: styleSheet.codeblockDecoration,
-                padding: EdgeInsets.all(styleSheet.codeblockPadding),
-                child: child
-              )
+              child: child
             )
           )
         );
