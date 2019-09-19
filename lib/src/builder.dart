@@ -211,12 +211,15 @@ class MarkdownBuilder implements md.NodeVisitor {
           ),
         );
       } else if (tag == 'pre') {
-        child = new DecoratedBox(
-          decoration: styleSheet.codeblockDecoration,
-          child: new Padding(
-            padding: new EdgeInsets.all(styleSheet.codeblockPadding),
-            child: child,
-          ),
+        child = SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: IntrinsicWidth(
+            child: Container(
+              decoration: styleSheet.codeblockDecoration,
+              padding: EdgeInsets.all(styleSheet.codeblockPadding),
+              child: child
+            )
+          )
         );
       } else if (tag == 'hr') {
         child = new DecoratedBox(
